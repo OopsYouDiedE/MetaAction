@@ -3,10 +3,12 @@ import base64
 import gradio as gr
 import numpy as np
 from openai import OpenAI
+import io
+import wave
 
 # 设置 OpenAI 客户端以使用 DashScope API
 client = OpenAI(
-    api_key=os.getenv("DASHSCOPE_API_KEY"),
+    api_key="sk-18698dad216d4616bbcbbd7f3c4af772",
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
 )
 
@@ -24,14 +26,35 @@ mime_types = {
     'ogg': 'audio/ogg',
 }
 
+def add_wav_header(pcm_data, sample_rate=24000, channels=1, bits_per_sample=16):
+    buffer = io.BytesIO()
+    with wave.open(buffer, 'wb') as wav_file:
+        wav_file.setnchannels(channels)
+        wav_file.setsampwidth(bits_per_sample // 8)
+        wav_file.setframerate(sample_rate)
+        wav_file.writeframes(pcm_data)
+    return buffer.getvalue()
+
+def audio_stream():
+    for chunk in completion:  # 假设 completion 已定义
+        if chunk.choices:
+            if hasattr(chunk.choices[0].delta, "audio"):
+                try:
+                    audio_string = chunk.choices[0].delta.audio["data"]
+                    pcm_bytes = base64.b64decode(audio_string)
+                    wav_bytes = add_wav_header(pcm_bytes)
+                    yield wav_bytes
+                except Exception as e:
+                    print(f"解码错误: {e}")
+
 def process_input(text, files):
     """
     处理用户输入，调用 API 并处理流式响应。
-    
+
     参数：
         text (str): 用户输入的文本。
         files (List[File]): 用户上传的文件列表。
-    
+
     返回：
         流式更新文本和音频输出。
     """
@@ -76,20 +99,25 @@ def process_input(text, files):
         modalities=["text", "audio"],
         audio={"voice": "Cherry", "format": "wav"}
     )
-    import tempfile
-    temp_audio_file = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
-    
+
     # 处理流式响应
     accumulated_text = ""
     audio_string=''
+    first_add_header=False
     for chunk in completion:
         if chunk.choices:
             delta=chunk.choices[0].delta
             if hasattr(delta, "audio"):
-                if "data" in delta.audio:
-                    audio_string = delta.audio["data"]
-                    wav_bytes = base64.b64decode(audio_string)
-                    yield wav_bytes
+                if "data" not in delta.audio:
+                  accumulated_text+=delta.audio["transcript"]
+                  yield accumulated_text,None
+                else:
+                    audio_string += delta.audio["data"]
+                    
+                    yield accumulated_text,None
+    wav_bytes = base64.b64decode(audio_string)
+    wav_bytes = add_wav_header(wav_bytes)
+    yield accumulated_text,wav_bytes
 
 
 # 创建 Gradio 界面
@@ -100,11 +128,12 @@ iface = gr.Interface(
         gr.File(label="上传文件（图片、视频、音频）", file_count="multiple")
     ],
     outputs=[
-        gr.Audio(label="音频响应",streaming=True)
+        gr.Text(label="文字回复"),
+        gr.Audio(label="音频响应")
     ],
     title="多模态聊天",
     description="输入问题并可选地上传图片、视频或音频文件，与多模态 API 进行交互。"
 )
 
 # 启动 Gradio 应用
-iface.launch()
+iface.launch(debug=True)
