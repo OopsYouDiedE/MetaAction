@@ -6,6 +6,10 @@ setup(
     packages=find_packages(),
     install_requires=[
         # 在这里添加依赖包，例如 'requests', 'numpy', 等等
+        'python-dotenv',
+        'openai',
+        'pyaudio',
+        'numpy',
 
 
     ],
@@ -25,5 +29,5 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.9,<3.12',
+    python_requires='>=3.9',
 )
