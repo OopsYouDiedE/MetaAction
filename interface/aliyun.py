@@ -5,10 +5,11 @@ import numpy as np
 from openai import OpenAI
 import io
 import wave
-
+import dotenv
+dotenv.load_dotenv()
 # 设置 OpenAI 客户端以使用 DashScope API
 client = OpenAI(
-    api_key="sk-18698dad216d4616bbcbbd7f3c4af772",
+    api_key=os.getenv("DASHSCOPE_API_KEY"),
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
 )
 
