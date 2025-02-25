@@ -8,7 +8,6 @@ setup(
         # 在这里添加依赖包，例如 'requests', 'numpy', 等等
         'python-dotenv',
         'openai',
-        'pyaudio',
         'numpy',
 
 
@@ -18,7 +17,7 @@ setup(
             # 在这里添加命令行脚本，例如 'simplemetagpt=simplemetagpt:main'
         ],
     },
-    author="Your Name",
+    author="OopsYouDiedE",
     author_email="your.email@example.com",
     description="A simple MetaGPT project",
     long_description=open('README.md', encoding="utf-8").read(),
