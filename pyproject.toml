@@ -1,0 +1,32 @@
+[project]
+name = "meta-action"
+version = "0.1.1"
+description = "一个简化版Metagpt用于我的AI项目"
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.9,<4.0"
+dependencies = [
+    "requests (>=2.32.3,<3.0.0)",
+    "aiohttp (>=3.11.13,<4.0.0)",
+    "dotenv (>=0.9.9,<0.10.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+pytest = "^8.3.4"
+isort = "^6.0.0"
+pyupgrade = "^3.19.1"
+pre-commit = "^4.1.0"
+mypy = "^1.15.0"
+darglint = "^1.8.1"
+safety = "^3.3.1"
+bandit = "^1.8.3"
+
