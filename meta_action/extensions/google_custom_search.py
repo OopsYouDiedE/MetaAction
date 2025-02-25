@@ -37,32 +37,7 @@ def google_search(query, api_key=API_KEY, cx=CX, num=10):
     # 提取并返回搜索结果
     if "items" in results: return results["items"]
     raise ValueError('No result return!')
-async def a_google_search(query, api_key=API_KEY, cx=CX, num=10):
-    """
-    使用 Google 自定义搜索 API 进行搜索
-    :param query: 搜索关键词
-    :param api_key: Google API 密钥
-    :param cx: 自定义搜索引擎 ID
-    :param num: 返回结果数量（1-10）
-    :return: 搜索结果列表
-    """
-    if not api_key or not cx: raise ValueError("GOOGLE_CUSTOM_SEARCH_API_KEY or GOOGLE_CUSTOM_SEARCH_CX not set in .env")
-    url = "https://www.googleapis.com/customsearch/v1"
-    params = {
-        "key": api_key,
-        "cx": cx,
-        "q": query,
-        "num": num  # 每页返回的结果数，最大为 10
-    }
-    
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, params=params) as response:
-            response.raise_for_status()
-            results = await response.json()
-    
-    # 提取并返回搜索结果
-    if "items" in results: return results["items"]
-    raise ValueError('No result return!')
+
 
 def display_results(results):
     """返回搜索结果,其中链接被简写为其"""
@@ -91,16 +66,9 @@ def pipe(query):
     except Exception as e:
         return None, None, e
 
-async def a_pipe(query):
-    try:
-        results = await a_google_search(query)
-        answer = display_results(results)
-        return results, answer, None
-    except Exception as e:
-        return None, None, e
 
 if __name__=="__main__":
-    results, answer, error = asyncio.run(a_pipe('popular search engine API'))
+    results, answer, error = pipe('popular search engine API')
     if error:
         raise error
     else:
